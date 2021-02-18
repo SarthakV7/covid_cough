@@ -1,3 +1,5 @@
+import os
+import sys
 import numpy as np
 import pandas as pd
 import librosa
@@ -87,6 +89,22 @@ def process_data(file):
   x_img = expand_dims(x_img)
   return x_img
 
- def load_model():
-    model = tf.keras.models.load_model('./resnet50_covid.h5')
-    return model
+def load_model():
+  model = tf.keras.models.load_model('./resnet50_covid.h5')
+  return model
+
+file_name = sys.argv[1]
+if '.wav' not in file_name:
+  print('please pass an audio file name ending with .wav')
+
+else:
+  file_name = './'+file_name
+  print('file loaded... processing now...')
+  x_img = process_data(file_name)
+  print('file processed... loading model...')
+  model = load_model()
+  print('model loaded... predicting...')
+  prob = model.predict(x_img)
+  print('*'*30)
+  print('probability of covid-19:', prob)
+  print('*'*30)
