@@ -1,22 +1,23 @@
 import os
 import sys
 import numpy as np
-import pandas as pd
 import librosa
-from tensorflow.keras.layers import Input, Dense, Dropout, Flatten, Conv2D, MaxPool2D, concatenate, BatchNormalization
-from tensorflow.keras.models import Model, Sequential
 import tensorflow as tf
-import tensorflow.keras.backend as K
-from tensorflow.keras.applications.resnet50 import ResNet50
-from tensorflow.keras.applications import VGG16
-from tensorflow.keras.optimizers import Adam
-os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+# os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 # if you need any imports you can do that here.
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 sample_rate = 48000
 def load_wav(x, sample_rate=48000):
     '''This return the array values of audio with sampling rate of 48000 and Duration'''
     samples_, sample_rate = librosa.load(x, sr=sample_rate)
+    non_silent = librosa.effects.split(samples_, frame_length=1024, hop_length=50)
+    samples = np.concatenate([samples_[i:j] for i,j in non_silent])
+    return samples
+
+def load_wav_2(samples_, sample_rate=48000):
+    '''This return the array values of audio with sampling rate of 48000 and Duration'''
     non_silent = librosa.effects.split(samples_, frame_length=1024, hop_length=50)
     samples = np.concatenate([samples_[i:j] for i,j in non_silent])
     return samples
@@ -93,18 +94,18 @@ def load_model():
   model = tf.keras.models.load_model('./resnet50_covid.h5')
   return model
 
-file_name = sys.argv[1]
-if '.wav' not in file_name:
-  print('please pass an audio file name ending with .wav')
-
-else:
-  file_name = './'+file_name
-  print('file loaded... processing now...')
-  x_img = process_data(file_name)
-  print('file processed... loading model...')
-  model = load_model()
-  print('model loaded... predicting...')
-  prob = model.predict(x_img)
-  print('*'*30)
-  print('probability of covid-19:', prob)
-  print('*'*30)
+# file_name = sys.argv[1]
+# if '.wav' not in file_name:
+#   print('please pass an audio file name ending with .wav')
+#
+# else:
+#   file_name = './'+file_name
+#   print('file loaded... processing now...')
+#   x_img = process_data(file_name)
+#   print('file processed... loading model...')
+#   model = load_model()
+#   print('model loaded... predicting...')
+#   prob = model.predict(x_img)
+#   print('*'*30)
+#   print('probability of covid-19:', prob)
+#   print('*'*30)
